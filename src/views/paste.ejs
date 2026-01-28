@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Paste</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Pastebin Lite</h1>
+      <a href="/" style="color: #94a3b8; text-decoration: none;">&larr; Create New Paste</a>
+    </header>
+
+    <main class="card">
+      <div class="meta-info">
+        <% if (expires_at) { %>
+          <span>Expires: <%= new Date(expires_at).toLocaleString() %></span>
+          <% } else { %>
+            <span>Expires: Never</span>
+            <% } %>
+
+              <% if (remaining_views !==null) { %>
+                <span style="color: <%= remaining_views === 0 ? '#ef4444' : '#34d399' %>;">
+                  Remaining Views: <%= remaining_views %>
+                </span>
+                <% } %>
+      </div>
+
+      <!-- IMPORTANT: Use escaped output for security -->
+      <div class="paste-content">
+        <%= content %>
+      </div>
+    </main>
+  </div>
+</body>
+
+</html>

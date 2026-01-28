@@ -1,0 +1,22 @@
+{
+  "name": "aganitha_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "fs-extra": "^11.3.3",
+    "ioredis": "^5.9.2",
+    "nodemon": "^3.1.11",
+    "uuid": "^13.0.0"
+  }
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastebin Lite</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pastebin Lite</h1>
+            <p class="subtitle">Share text securely with expiration.</p>
+        </header>
+
+        <main class="card">
+            <div id="create-form">
+                <div class="form-group">
+                    <label for="content">Paste Content</label>
+                    <textarea id="content" placeholder="Type your text here..." spellcheck="false"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="ttl">Expiration (TTL)</label>
+                            <select id="ttl" style="width: 100%; padding: 1rem; background: var(--input-bg); color: white; border: var(--glass-border); border-radius: 8px;">
+                                <option value="">Never</option>
+                                <option value="60">1 Minute</option>
+                                <option value="600">10 Minutes</option>
+                                <option value="3600">1 Hour</option>
+                                <option value="86400">1 Day</option>
+                                <option value="custom">Custom (Seconds)</option>
+                            </select>
+                            <input type="number" id="ttl_custom" placeholder="Seconds" style="display: none; margin-top: 0.5rem;" min="1">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="max_views">Max Views (Optional)</label>
+                            <input type="number" id="max_views" placeholder="e.g. 5" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <button id="submit-btn">Create Paste</button>
+            </div>
+
+            <div id="result" class="success-modal">
+                <h3 style="margin-top: 0; color: #34d399;">Paste Created!</h3>
+                <p>Your paste is live at:</p>
+                <div class="url-box">
+                    <input type="text" id="paste-url" readonly>
+                    <button style="width: auto; padding: 0.5rem 1rem;" onclick="copyUrl()">Copy</button>
+                    <a id="visit-link" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); padding: 0 1rem; border-radius: 8px; color: white; text-decoration: none;">Visit</a>
+                </div>
+                <button style="margin-top: 1rem; background: transparent; border: 1px solid white;" onclick="resetForm()">Create Another</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ttlSelect = document.getElementById('ttl');
+        const ttlCustom = document.getElementById('ttl_custom');
+        const submitBtn = document.getElementById('submit-btn');
+        const contentInput = document.getElementById('content');
+        const maxViewsInput = document.getElementById('max_views');
+        const resultDiv = document.getElementById('result');
+        const formDiv = document.getElementById('create-form');
+        const pasteUrlInput = document.getElementById('paste-url');
+        const visitLink = document.getElementById('visit-link');
+
+        ttlSelect.addEventListener('change', () => {
+            if (ttlSelect.value === 'custom') {
+                ttlCustom.style.display = 'block';
+            } else {
+                ttlCustom.style.display = 'none';
+            }
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            const content = contentInput.value;
+            if (!content.trim()) {
+                alert('Please enter some content');
+                return;
+            }
+
+            let ttl_seconds = undefined;
+            if (ttlSelect.value === 'custom') {
+                ttl_seconds = parseInt(ttlCustom.value);
+            } else if (ttlSelect.value) {
+                ttl_seconds = parseInt(ttlSelect.value);
+            }
+
+            const max_views = maxViewsInput.value ? parseInt(maxViewsInput.value) : undefined;
+
+            const payload = {
+                content,
+                ttl_seconds: isNaN(ttl_seconds) ? undefined : ttl_seconds,
+                max_views: isNaN(max_views) ? undefined : max_views
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const res = await fetch('/api/pastes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Failed to create paste');
+                }
+
+                const data = await res.json();
+                showResult(data.url);
+
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Paste';
+            }
+        });
+
+        function showResult(url) {
+            formDiv.style.display = 'none';
+            resultDiv.classList.add('visible');
+            pasteUrlInput.value = url;
+            visitLink.href = url;
+        }
+
+        function resetForm() {
+            formDiv.style.display = 'block';
+            resultDiv.classList.remove('visible');
+            contentInput.value = '';
+            maxViewsInput.value = '';
+            ttlSelect.value = '';
+            ttlCustom.value = '';
+            ttlCustom.style.display = 'none';
+        }
+
+        function copyUrl() {
+            pasteUrlInput.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
