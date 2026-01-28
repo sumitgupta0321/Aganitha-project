@@ -16,6 +16,8 @@ app.set("views", __dirname + "/views");
 // API Routes
 app.use("/api", apiRoutes);
 
+//live link https://aganitha-project-2.onrender.com
+
 // Health Check (Explicitly requested in root or api? Prompt says GET /api/healthz)
 // apiRoutes handles /api, so inside api.js we should have /healthz or mount it here.
 // I'll add it to api.js or here.
